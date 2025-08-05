@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Run tests
+      run: make test
+
+    - name: Build binaries
+      run: make build-all
+
+    - name: Create checksums
+      run: |
+        sha256sum mf-linux-amd64 > checksums.txt
+        sha256sum mf-windows-amd64.exe >> checksums.txt
+        sha256sum mf-macos-amd64 >> checksums.txt
+        sha256sum mf-macos-arm64 >> checksums.txt
+
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          mf-linux-amd64
+          mf-windows-amd64.exe
+          mf-macos-amd64
+          mf-macos-arm64
+          checksums.txt
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
