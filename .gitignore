@@ -39,6 +39,7 @@ Thumbs.db
 test-config/
 *.local
 .env
+coverage.html
 
 # Distribution files
 dist/
